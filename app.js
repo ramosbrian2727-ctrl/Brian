@@ -875,7 +875,6 @@ function settingsHtml() {
             <label>Email del usuario registrado <input id="memberEmail" type="email" placeholder="email@ejemplo.com"></label>
             <label>Rol
               <select id="memberRole">
-                <option value="admin">Administrador</option>
                 <option value="editor">Editor</option>
                 <option value="collaborator">Colaborador</option>
                 <option value="viewer">Espectador</option>
@@ -1143,6 +1142,7 @@ async function addMember(e) {
   if (!isAdmin()) return;
   const email = document.getElementById("memberEmail").value.trim().toLowerCase();
   const role = document.getElementById("memberRole").value;
+  if (role === "admin") return toast("Solo el propietario puede ser administrador.");
 
   const { data: prof, error: profileError } = await supabase
     .from("profiles")
@@ -1180,7 +1180,6 @@ async function loadAccessRequestsTable() {
         <option value="editor">Editor</option>
         <option value="collaborator" selected>Colaborador</option>
         <option value="viewer">Espectador</option>
-        <option value="admin">Administrador</option>
       </select></td>
       <td><div class="row-actions">
         <button class="btn primary small-btn" data-approve-request="${r.request_id}">Aprobar</button>
@@ -1213,7 +1212,7 @@ async function loadMembersTable() {
 
   const { data, error } = await supabase
     .from("group_members")
-    .select("id, role, user_id, profiles(email)")
+    .select("id, role, user_id, created_at")
     .eq("group_id", currentGroup.id)
     .order("created_at", { ascending: true });
 
@@ -1222,9 +1221,24 @@ async function loadMembersTable() {
     return;
   }
 
-  table.innerHTML = (data || []).map((m) => `
+  const members = data || [];
+  const userIds = [...new Set(members.map(m => m.user_id))];
+  let emailByUser = {};
+  if (userIds.length) {
+    const { data: profileRows, error: profilesError } = await supabase
+      .from("profiles")
+      .select("id,email")
+      .in("id", userIds);
+    if (profilesError) {
+      table.innerHTML = `<tr><td colspan="3">${safe(profilesError.message)}</td></tr>`;
+      return;
+    }
+    emailByUser = Object.fromEntries((profileRows || []).map(p => [p.id, p.email]));
+  }
+
+  table.innerHTML = members.map((m) => `
     <tr>
-      <td>${safe(m.profiles?.email || m.user_id)}</td>
+      <td>${safe(emailByUser[m.user_id] || m.user_id)}</td>
       <td>${roleName(m.role)}</td>
       <td>
         <button class="btn danger small-btn" data-remove-member="${m.id}" ${!isAdmin() || m.user_id === session.user.id ? "disabled" : ""}>Quitar</button>

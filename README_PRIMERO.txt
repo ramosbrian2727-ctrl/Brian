@@ -1,18 +1,17 @@
-GASTOS DE CASA PRO v3 - ACCESO PRIVADO
+GASTOS DE CASA PRO v4 - UN SOLO ADMINISTRADOR
 
-1) Ejecutá en Supabase el archivo:
-   ACTUALIZACION_SUPABASE_v3_ACCESO_PRIVADO.sql
+1. Ejecutá ACTUALIZACION_SUPABASE_v4_UN_SOLO_ADMIN.sql en Supabase > SQL Editor.
+2. Subí a GitHub los archivos SUELTOS de esta carpeta, reemplazando los anteriores.
+3. Vercel publicará automáticamente.
+4. Actualizá la app con Ctrl + F5.
 
-2) Después subí TODOS los archivos de esta carpeta a tu repositorio de GitHub,
-   reemplazando los anteriores.
+Cambios:
+- Solo el propietario del grupo puede ser administrador.
+- Los demás roles son Editor, Colaborador o Espectador.
+- Los usuarios nuevos no pueden crear otro grupo.
+- Solo pueden solicitar acceso y esperar tu aprobación.
+- Se corrige la carga de Usuarios autorizados sin depender del JOIN que daba error.
 
-3) Confirmá el cambio (Commit changes). Vercel publicará la actualización automáticamente.
-
-NUEVA SEGURIDAD:
-- Compartir el enlace no concede acceso.
-- Registrarse no concede acceso.
-- El código solo envía una solicitud.
-- El administrador aprueba o rechaza desde Configuración > Usuarios y permisos.
-- Hasta la aprobación, el usuario no ve gastos, saldos, personas ni movimientos.
-
-No compartas claves secretas o service_role. config.js utiliza únicamente la clave pública.
+IMPORTANTE:
+Esta actualización no elimina el segundo grupo que ya fue creado. Lo deja aislado.
+Para borrar ese grupo sin tocar el tuyo, primero hay que identificar cuál es el correcto.
